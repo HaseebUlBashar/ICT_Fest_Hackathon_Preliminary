@@ -123,6 +123,8 @@ def create_booking(
             created_at=now,
         )
         db.add(booking)
+        db.flush() #Haseeb
+        booking.reference_code = f"CW-{booking.id:06d}" #Haseeb
         db.commit()
         db.refresh(booking)
 
