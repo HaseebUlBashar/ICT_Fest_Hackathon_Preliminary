@@ -10,6 +10,8 @@ from ..auth import (
     hash_password,
     revoke_access_token,
     verify_password,
+    is_refresh_token_used, #Haseeb
+    mark_refresh_token_used,
 )
 from ..database import get_db
 from ..errors import AppError
@@ -83,6 +85,9 @@ def refresh(payload: RefreshRequest, db: Session = Depends(get_db)):
     data = decode_token(payload.refresh_token)
     if data.get("type") != "refresh":
         raise AppError(401, "UNAUTHORIZED", "Wrong token type")
+    if is_refresh_token_used(data["jti"]):
+        raise AppError(401, "UNAUTHORIZED", "Refresh token already used") #haseeb
+    mark_refresh_token_used(data["jti"]) #haseeb
     user = db.query(User).filter(User.id == int(data["sub"])).first()
     if user is None:
         raise AppError(401, "UNAUTHORIZED", "Unknown user")
