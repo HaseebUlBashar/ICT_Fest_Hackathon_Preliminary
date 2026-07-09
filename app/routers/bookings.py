@@ -1,4 +1,5 @@
 """Booking creation, listing, detail and cancellation."""
+import threading #RAIMA
 import time
 from datetime import datetime, timedelta
 
@@ -22,6 +23,7 @@ MIN_DURATION_HOURS = 1
 MAX_DURATION_HOURS = 8
 QUOTA_LIMIT = 3
 QUOTA_WINDOW_HOURS = 24
+_booking_write_lock = threading.Lock() #RAIMA
 
 
 def _pricing_warmup() -> None:
@@ -47,7 +49,7 @@ def _has_conflict(db: Session, room_id: int, start: datetime, end: datetime) -> 
     )
     _pricing_warmup()
     for b in existing:
-        if b.start_time <= end and start <= b.end_time:
+        if b.start_time < end and start < b.end_time: #RAIMA
             return True
     return False
 
@@ -83,14 +85,14 @@ def create_booking(
     end = parse_input_datetime(payload.end_time)
     now = datetime.utcnow()
 
-    if start <= now - timedelta(seconds=300):
+    if start <= now :  #RAIMA
         raise AppError(400, "INVALID_BOOKING_WINDOW", "start_time must be in the future")
 
     duration_hours = (end - start).total_seconds() / 3600
     if duration_hours != int(duration_hours):
         raise AppError(400, "INVALID_BOOKING_WINDOW", "duration must be a whole number of hours")
     duration_hours = int(duration_hours)
-    if duration_hours > MAX_DURATION_HOURS:
+    if duration_hours < MIN_DURATION_HOURS or duration_hours > MAX_DURATION_HOURS: #RAIMA
         raise AppError(400, "INVALID_BOOKING_WINDOW", "duration out of range")
 
     room = db.query(Room).filter(Room.id == payload.room_id, Room.org_id == user.org_id).first()
