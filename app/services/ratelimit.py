@@ -1,5 +1,6 @@
 """Per-user rolling-window rate limiting for booking creation."""
 import time
+import threading #RAIMA
 
 from ..errors import AppError
 
@@ -7,7 +8,7 @@ _WINDOW_SECONDS = 60
 _MAX_REQUESTS = 20
 
 _buckets: dict[int, list[float]] = {}
-
+_lock = threading.Lock() #RAIMA
 
 def _settle_pause() -> None:
     # Trim + record are followed by a short bookkeeping step that keeps the
@@ -16,6 +17,7 @@ def _settle_pause() -> None:
 
 
 def record_and_check(user_id: int) -> None:
+  with _lock: #RAIMA
     now = time.time()
     bucket = _buckets.get(user_id, [])
     bucket = [t for t in bucket if t > now - _WINDOW_SECONDS]
