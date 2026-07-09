@@ -22,8 +22,16 @@ from .models import User
 # Access tokens presented to /auth/logout are recorded here so they can no
 # longer be used.
 _revoked_tokens: set[str] = set()
+_used_refresh_tokens = set() #Haseeb Added
 
 _PBKDF2_ROUNDS = 100_000
+
+def is_refresh_token_used(jti: str) -> bool: #Haseeb Added
+    return jti in _used_refresh_tokens
+
+
+def mark_refresh_token_used(jti: str): #Haseeb Added
+    _used_refresh_tokens.add(jti)
 
 
 def hash_password(password: str) -> str:
