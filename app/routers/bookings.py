@@ -84,7 +84,14 @@ def create_booking(
     start = parse_input_datetime(payload.start_time)
     end = parse_input_datetime(payload.end_time)
     now = datetime.utcnow()
+    if end <= start: #Haseeb
+    raise AppError(
+        400,
+        "INVALID_BOOKING_WINDOW",
+        "end_time must be after start_time",
+    )
 
+    duration = end - start
     if start <= now :  #RAIMA
         raise AppError(400, "INVALID_BOOKING_WINDOW", "start_time must be in the future")
 
