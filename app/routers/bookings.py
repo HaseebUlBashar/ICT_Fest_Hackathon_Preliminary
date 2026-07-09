@@ -85,10 +85,10 @@ def create_booking(
     end = parse_input_datetime(payload.end_time)
     now = datetime.utcnow()
     if end <= start: #Haseeb
-    raise AppError(
-        400,
-        "INVALID_BOOKING_WINDOW",
-        "end_time must be after start_time",
+        raise AppError(
+            400,
+            "INVALID_BOOKING_WINDOW",
+            "end_time must be after start_time",
     )
 
     duration = end - start
