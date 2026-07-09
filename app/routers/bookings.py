@@ -105,7 +105,7 @@ def create_booking(
     room = db.query(Room).filter(Room.id == payload.room_id, Room.org_id == user.org_id).first()
     if room is None:
         raise AppError(404, "ROOM_NOT_FOUND", "Room not found")
-    with _booking_write_lock:
+    with _booking_write_lock: #Haseeb
         if _has_conflict(db, room.id, start, end):
             raise AppError(409, "ROOM_CONFLICT", "Room already booked for this interval")
     
